@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Three computational probes</title>
+  <link rel="stylesheet" href="experiments.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">GEB / probes, not presentation</p>
+      <h1>Three small systems under pressure</h1>
+      <p>Each probe is intentionally plain. Change a state, translate it, and watch what survives or breaks.</p>
+    </header>
+
+    <section class="probe" id="probe-transfer">
+      <div class="probe-heading"><span>01</span><h2>One object, many worlds</h2></div>
+      <p class="question">Can a directed object travel between symbolic, spatial, musical, and computational substrates without losing its identity?</p>
+      <div class="controls">
+        <button id="transferAdd">add edge</button>
+        <button id="transferReverse">reverse edge</button>
+        <button id="transferCompress">compress labels</button>
+        <button id="transferReset">reset</button>
+      </div>
+      <div class="readouts">
+        <div><b>exact state</b><code id="transferState"></code></div>
+        <div><b>candidate invariant</b><strong id="transferInvariant"></strong></div>
+        <div><b>loss report</b><span id="transferLoss"></span></div>
+      </div>
+      <div class="worlds">
+        <article><h3>symbolic</h3><pre id="transferSymbolic"></pre></article>
+        <article><h3>spatial</h3><div id="transferSpatial" class="spatial"></div></article>
+        <article><h3>musical</h3><div id="transferMusical" class="musical"></div><button id="transferPlay">play walk</button></article>
+        <article><h3>computational</h3><pre id="transferComputed"></pre></article>
+      </div>
+      <p class="result" id="transferResult"></p>
+    </section>
+
+    <section class="probe" id="probe-observer">
+      <div class="probe-heading"><span>02</span><h2>The observer enters the machine</h2></div>
+      <p class="question">The object stays fixed while the observer changes. Then the machine is allowed to consume its own description.</p>
+      <div class="controls">
+        <button id="observerStep">step system</button>
+        <button id="observerSelf">feed description back</button>
+        <button id="observerReset">reset</button>
+        <label>observer <select id="observerMode"><option value="symbols">symbols</option><option value="number">number</option><option value="sound">sound</option><option value="rule">rule</option></select></label>
+      </div>
+      <div class="observer-grid">
+        <pre id="observerState"></pre>
+        <div><b>current interpretation</b><p id="observerReading"></p><b>causal trace</b><pre id="observerTrace"></pre></div>
+      </div>
+      <p class="result" id="observerResult"></p>
+    </section>
+
+    <section class="probe" id="probe-book">
+      <div class="probe-heading"><span>03</span><h2>A book-shaped machine</h2></div>
+      <p class="question">If chapters are contexts and recurring motifs are transitions, does the book’s structure produce an attractor?</p>
+      <div class="controls">
+        <button id="bookAdvance">advance motif</button>
+        <button id="bookJump">jump to self-reference</button>
+        <button id="bookReset">reset</button>
+      </div>
+      <div class="book-grid">
+        <pre id="bookGraph"></pre>
+        <div><b>current context</b><h3 id="bookContext"></h3><p id="bookDescription"></p><b>path so far</b><p id="bookPath"></p></div>
+      </div>
+      <p class="result" id="bookResult"></p>
+    </section>
+
+    <footer><strong>Working question:</strong> what is the smallest mechanism worth keeping?</footer>
+  </main>
+  <script src="experiments.js"></script>
+</body>
+</html>
