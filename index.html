@@ -3,38 +3,357 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A long-form, interactive explanation of Gödel's First Incompleteness Theorem, arithmetic encoding, diagonalization, and the Halting Problem.">
   <title>Gödel / the sentence that mathematics cannot settle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="scene" aria-hidden="true"></div>
-  <div class="scene-readout"><span id="stageReadout">01 / symbols</span><span id="sceneStatus">machine idle</span></div>
-  <header class="topline"><a href="#opening">GÖDEL / INCOMPLETENESS</a><span>an interactive mathematical journey</span></header>
+
+  <div class="hud">
+    <header class="topline">
+      <a href="#opening">GÖDEL / INCOMPLETENESS</a>
+      <span>formal system / proof machine / strange loop</span>
+    </header>
+
+    <div class="scene-readout" aria-live="polite">
+      <span id="stageReadout">01 / marks</span>
+      <span id="sceneStatus">machine idle</span>
+    </div>
+  </div>
+
+  <div id="helpOverlay" class="help-overlay hidden" aria-live="polite" aria-label="Learning goals overlay">
+    <div class="help-panel">
+      <p class="eyebrow">learning goals</p>
+      <ul>
+        <li>formal systems and mechanical rules</li>
+        <li>proofs as finite derivations</li>
+        <li>encoding syntax as arithmetic</li>
+        <li>diagonalization and self-reference</li>
+        <li>the Gödel sentence and incompleteness</li>
+        <li>truth versus provability</li>
+        <li>the Halting Problem as related diagonal structure</li>
+        <li>strange loops and meta-levels</li>
+      </ul>
+      <button type="button" data-action="close-help">close</button>
+    </div>
+  </div>
+
+  <div id="commandPalette" class="command-palette hidden" role="dialog" aria-modal="false" aria-label="Command palette">
+    <input id="commandInput" type="text" aria-label="Command entry" placeholder="jump to encoding, help, reset..." autocomplete="off">
+    <div id="commandSuggestions" class="command-suggestions"></div>
+  </div>
+
   <main id="journey">
-    <section class="chapter hero" id="opening" data-stage="0"><div class="hero-copy"><p class="kicker">A machine for looking at itself</p><h1>What happens when a formal system tries to settle every question it can express?</h1><p class="lede">A guided construction of Gödel's First Incompleteness Theorem. Begin with marks. End with a sentence whose meaning outruns the system that writes it.</p><a class="enter" href="#formal">enter the machine <span>↓</span></a></div><div class="hero-equation"><span>symbols</span><i>→</i><span>rules</span><i>→</i><span>proofs</span><i>→</i><span class="accent">?</span></div></section>
-    <section class="chapter split" id="formal" data-stage="1"><div class="copy"><p class="kicker">01 / the object level <em>TOY MODEL</em></p><h2>Start with a world that does not understand.</h2><p>A formal system is a machine with an alphabet, rules for forming strings, axioms, and rules of inference. It does not need to know what its symbols mean. It only needs to apply the rules exactly.</p><p class="technical">Our toy system starts with <code>A</code>. Its rules are <code>A → AB</code> and <code>B → BA</code>. A string is not yet a theorem; it becomes one only when we can show its derivation.</p><div class="controls"><button data-action="formal-step">apply rule</button><button data-action="formal-invalid">try invalid move</button><button data-action="formal-reset">reset</button></div><div class="machine-log" id="formalLog"></div></div><div class="proof-window"><div class="window-label">ACTIVE STRING</div><code id="formalString">A</code><div class="window-label">STATUS</div><strong id="formalStatus">axiom</strong><div class="window-label">DERIVATION</div><pre id="formalTrace">A  [axiom]</pre></div></section>
-    <section class="chapter" id="proof" data-stage="2"><div class="copy narrow"><p class="kicker">02 / derivation <em>STANDARD</em></p><h2>A theorem is a history.</h2><p>“True” is not the first question inside a formal system. The first question is: can this string be reached from the axioms by the permitted rules?</p></div><div class="proof-builder" id="proofBuilder"><div class="proof-step active"><span>01</span><code>A</code><small>axiom</small></div><div class="proof-arrow">↓ apply A → AB</div><div class="proof-step"><span>02</span><code>AB</code><small>theorem</small></div><div class="proof-arrow">↓ apply B → BA</div><div class="proof-step"><span>03</span><code>ABBA</code><small>theorem</small></div></div><p class="caption">Select a step. The corresponding rule wakes in the scene. A proof is not a vibe; it is a checkable finite object.</p></section>
-    <section class="chapter split" id="decision" data-stage="3"><div class="copy"><p class="kicker">03 / the first limit <em>GEB</em></p><h2>Generating proofs is not the same as deciding theoremhood.</h2><p>A proof checker can verify a proposed proof. A proof generator can keep producing theorems. But a decision procedure must always halt and answer YES or NO for an arbitrary candidate.</p><p>For a theorem, searching eventually finds a proof. For a non-theorem, the same search may simply continue. The missing proof is not itself a terminating answer.</p><div class="decision-machine"><code id="candidate">ABBA</code><button data-action="decision-search">search for proof</button><span id="decisionOutput">waiting</span></div></div><div class="enumerator" id="enumerator"><span>proof search</span><div class="ticks"></div><strong id="searchCount">0</strong><small>candidate derivations inspected</small></div></section>
-    <section class="chapter" id="selfref" data-stage="4"><div class="copy narrow"><p class="kicker">04 / the turn inward <em>GEB</em></p><h2>Self-reference is a change in what a statement can point to.</h2><p>First, a string points to another string. Then a string points to a description. The dangerous move is when the description is allowed to become input again.</p></div><div class="reference-ladder"><button data-action="self-step">step the reference</button><div class="ref-row"><span>statement</span><b>→</b><span id="refTarget">another statement</span></div><div class="ref-row"><span>statement</span><b>→</b><span>its description</span></div><div class="ref-row closed"><span id="refSource">statement</span><b>↺</b><span>its own description</span></div><p id="selfExplain">The loop is not the word “self.” It is a real substitution in which a description is returned to the construction.</p></div></section>
-    <section class="chapter split" id="encoding" data-stage="5"><div class="copy"><p class="kicker">05 / syntax becomes arithmetic <em>GEB + STANDARD</em></p><h2>Give every symbol a number.</h2><p>Gödel's move is not to claim that strings secretly are numbers. It is to build a mechanical, uniquely decodable correspondence. Once a string has a code, arithmetic can operate on the code.</p><p class="technical">This page uses a small positional toy code. TNT uses a more elaborate Gödel numbering. The point is the same: syntax becomes an object that number theory can describe.</p><div class="encoding-controls"><button data-action="encode-step">encode next symbol</button><button data-action="encode-reset">reset</button></div></div><div class="encoding-machine"><div id="symbolStrip"><span>A</span><span>→</span><span>B</span><span>(</span><span>)</span></div><div class="encode-arrow">↓</div><code id="numberStrip">—</code><div class="encode-arrow">↓ decode</div><code id="decodeStrip">—</code></div></section>
-    <section class="chapter diagonal" id="diagonal" data-stage="6"><div class="copy"><p class="kicker">06 / the great trick <em>STANDARD</em></p><h2>A description can be applied to the thing it describes.</h2><p>Diagonalization is the construction that turns “a formula with a free place” into a formula that receives its own code. This is the engine behind the self-reference, not an infinite mirror.</p><div class="diag-controls"><button data-action="diag-step">next construction step</button><button data-action="diag-reset">reset</button></div><div class="diag-log" id="diagLog">1 / choose a property P(x)</div></div><div class="diag-stage"><div class="diag-node function-node" id="diagFunction">P(x)</div><div class="diag-line"></div><div class="diag-node code-node" id="diagCode">⌜P(x)⌝</div><div class="diag-line"></div><div class="diag-node output-node" id="diagOutput">P(⌜P⌝)</div></div></section>
-    <section class="chapter godel" id="godel" data-stage="7"><div class="copy narrow"><p class="kicker">07 / construct G <em>STANDARD / PEDAGOGICAL MODEL</em></p><h2>Now make the system speak about its own proofs.</h2><p>Let <code>Proof<sub>S</sub>(p, q)</code> mean: <em>p</em> codes a valid proof in S of the formula whose code is <em>q</em>. Let <code>Prov<sub>S</sub>(q)</code> mean: some <em>p</em> is a proof code for <em>q</em>.</p><p>The diagonal construction produces a sentence <strong>G</strong> that is equivalent to:</p><div class="equation-big">G ↔ ¬Prov<sub>S</sub>(⌜G⌝)</div><p>In the intended arithmetic interpretation, G says: <em>“G is not provable in S.”</em> It is built from encoding and substitution; it is not smuggled in as a slogan.</p><div class="controls"><button data-action="godel-step">reveal next layer</button><button data-action="godel-reset">reset</button></div></div><div class="godel-build" id="godelBuild"><div>system S</div><div>proof predicate</div><div>self-code ⌜G⌝</div><div class="g-final">G : ¬Prov<sub>S</sub>(⌜G⌝)</div></div></section>
-    <section class="chapter split" id="branches" data-stage="8"><div class="copy"><p class="kicker">08 / why incompleteness follows <em>STANDARD</em></p><h2>Follow both branches. Do not skip the logic.</h2><p>Assume S has the required arithmetic strength. The first branch uses consistency; the second carries the stronger soundness or omega-consistency qualification used by the chosen proof formulation.</p><div class="branch-controls"><button data-action="branch-g">assume S ⊢ G</button><button data-action="branch-notg">assume S ⊢ ¬G</button><button data-action="branch-reset">clear branches</button></div><div id="branchResult" class="branch-result">Choose a branch to inspect the consequence.</div></div><div class="branch-tree"><div class="branch-root">G ↔ ¬Prov<sub>S</sub>(⌜G⌝)</div><div class="branch-line"></div><div class="branch-columns"><div id="branchG">S ⊢ G<br><small>not yet examined</small></div><div id="branchNotG">S ⊢ ¬G<br><small>not yet examined</small></div></div></div></section>
-    <section class="chapter truth" id="truth" data-stage="9"><div class="copy narrow"><p class="kicker">09 / two viewpoints <em>STANDARD</em></p><h2>Truth and provability are different relations.</h2><p>From inside S, the question is whether a formal derivation exists. From an external meta-level, we can reason about what the encoded sentence says in the intended model of the natural numbers.</p><p>Under the appropriate soundness condition, G is true in that intended interpretation because it really has no S-proof. That does <strong>not</strong> mean every unprovable sentence is true.</p></div><div class="truth-layers"><div class="layer inner"><span>inside S</span><strong id="innerTruth">no proof found</strong></div><div class="layer outer"><span>external arithmetic view</span><strong id="outerTruth">G is true if S is sound here</strong></div><input id="truthSlider" type="range" min="0" max="100" value="50"><p id="truthReadout">Move between the relations. The sentence stays fixed; the viewpoint changes.</p></div></section>
-    <section class="chapter strengthen split" id="strengthen" data-stage="10"><div class="copy"><p class="kicker">10 / try to escape <em>STANDARD</em></p><h2>Add G as an axiom.</h2><p>This genuinely strengthens the system. In <code>S + G</code>, the old G now has a one-line proof. That is not useless. It is simply not the end: the diagonal construction can be run again for the stronger system.</p><button data-action="add-axiom">add G to S</button><div class="system-growth" id="systemGrowth">S <span>→</span> S + ?</div></div><div class="new-limit"><span>new system</span><strong id="strongerSystem">S</strong><div id="newLimitText">Its own undecidable sentence has not been constructed yet.</div></div></section>
-    <section class="chapter halting" id="halting" data-stage="11"><div class="copy"><p class="kicker">11 / a different substrate <em>STANDARD</em></p><h2>Now replace proofs with programs.</h2><p>The Halting Problem is not Gödel's theorem. It is a theorem about computation. The connection is that both can encode descriptions and then feed a description back into the mechanism.</p><div class="halting-machine"><code>HALT?(P, x)</code><span id="oracleAnswer">oracle waiting</span><button data-action="oracle-normal">run ordinary program</button><button data-action="oracle-diagonal">run D on D</button></div><pre class="code-block">D(P):
+    <section class="chapter hero" id="opening" data-stage="0">
+      <div class="hero-copy">
+        <p class="eyebrow">a machine for looking at itself</p>
+        <h1>What happens when a formal system tries to settle every question it can express?</h1>
+        <p class="lede">A long-form construction of Gödel’s First Incompleteness Theorem. We begin with marks and end with a sentence whose meaning exceeds the machine that generated it.</p>
+        <a class="enter-link" href="#formal">enter the machine <span>↓</span></a>
+      </div>
+      <div class="hero-equation" aria-label="formal system progression">
+        <span>marks</span><i>→</i><span>rules</span><i>→</i><span>proofs</span><i>→</i><span class="glow">?</span>
+      </div>
+    </section>
+
+    <section class="chapter" id="formal" data-stage="1">
+      <div class="copy">
+        <p class="eyebrow">01 / the object level <em>toy model</em></p>
+        <h2>Start with a world that does not understand itself.</h2>
+        <p>A formal system is a finite machine: an alphabet, strings, axioms, and rules of transformation. It can manipulate marks without assigning any meaning to them in advance.</p>
+        <p class="technical">This toy machine begins with the axiom A. The rules are A → AB and B → BA. Nothing here is “true” yet; only derivable sequences exist.</p>
+        <div class="button-row">
+          <button type="button" data-action="formal-step">apply rule</button>
+          <button type="button" data-action="formal-invalid">try invalid move</button>
+          <button type="button" data-action="formal-reset">reset</button>
+        </div>
+        <div class="machine-log" id="formalLog" aria-live="polite">the base axiom is ready</div>
+      </div>
+
+      <aside class="proof-window">
+        <div class="window-label">active string</div>
+        <code id="formalString">A</code>
+        <div class="window-label">status</div>
+        <strong id="formalStatus">axiom</strong>
+        <div class="window-label">derivation</div>
+        <pre id="formalTrace">A  [axiom]</pre>
+      </aside>
+    </section>
+
+    <section class="chapter" id="proof" data-stage="2">
+      <div class="copy narrow">
+        <p class="eyebrow">02 / derivation <em>standard</em></p>
+        <h2>A theorem is a history, not a feeling.</h2>
+        <p>Inside a formal system, the initial question is not “is this true?” but “is there a permitted finite derivation that reaches this string?”</p>
+      </div>
+
+      <div class="proof-builder" id="proofBuilder" aria-label="Proof tree">
+        <div class="proof-step active" data-step="0"><span>01</span><code>A</code><small>axiom</small></div>
+        <div class="proof-arrow">↓ apply A → AB</div>
+        <div class="proof-step" data-step="1"><span>02</span><code>AB</code><small>derived</small></div>
+        <div class="proof-arrow">↓ apply B → BA</div>
+        <div class="proof-step" data-step="2"><span>03</span><code>ABBA</code><small>derived</small></div>
+      </div>
+
+      <p class="caption">Select a step. The machine marks the exact rule that made it possible. A proof is a finite object that can be checked.</p>
+    </section>
+
+    <section class="chapter" id="decision" data-stage="3">
+      <div class="copy">
+        <p class="eyebrow">03 / deciding theoremhood <em>standard</em></p>
+        <h2>Generating proofs is not the same as deciding whether a string is a theorem.</h2>
+        <p>A proof generator can search for a derivation. A proof checker can confirm one. But a decision procedure must always halt with yes or no for an arbitrary candidate.</p>
+        <div class="decision-machine">
+          <code id="candidate">ABBA</code>
+          <button type="button" data-action="decision-search">search for proof</button>
+          <span id="decisionOutput">waiting</span>
+        </div>
+      </div>
+
+      <aside class="enumerator" aria-live="polite">
+        <span>proof search</span>
+        <div class="ticks"></div>
+        <strong id="searchCount">0</strong>
+        <small>candidate derivations inspected</small>
+      </aside>
+    </section>
+
+    <section class="chapter" id="selfref" data-stage="4">
+      <div class="copy narrow">
+        <p class="eyebrow">04 / the turn inward <em>geb</em></p>
+        <h2>Self-reference is not a slogan; it is a substitution.</h2>
+        <p>First a statement points to another statement. Then it points to a description of a statement. The dangerous move is when the description is allowed back into the construction as input.</p>
+      </div>
+
+      <div class="reference-ladder">
+        <button type="button" data-action="self-step">step the reference</button>
+        <div class="ref-row"><span>statement</span><b>→</b><span id="refTarget">another statement</span></div>
+        <div class="ref-row"><span>statement</span><b>→</b><span>its description</span></div>
+        <div class="ref-row closed"><span id="refSource">statement</span><b>↺</b><span>its own description</span></div>
+        <p id="selfExplain">The loop is not the word “self.” It is a real substitution in which a description is fed back into the construction.</p>
+      </div>
+    </section>
+
+    <section class="chapter" id="encoding" data-stage="5">
+      <div class="copy">
+        <p class="eyebrow">05 / syntax becomes arithmetic <em>geb + standard</em></p>
+        <h2>Give every symbol a number.</h2>
+        <p>Gödel’s great insight is mechanical, not mystical: assign a unique code to each symbol, then encode strings and proofs as numbers. Once syntax has a numeric form, arithmetic can talk about it.</p>
+        <p class="technical">This toy code is a stand-in for Gödel numbering. The structure matters more than the exact encoding.</p>
+        <div class="button-row">
+          <button type="button" data-action="encode-step">encode next symbol</button>
+          <button type="button" data-action="encode-reset">reset</button>
+        </div>
+      </div>
+
+      <aside class="encoding-machine">
+        <div id="symbolStrip" class="symbol-strip"><span>A</span><span>→</span><span>B</span><span>(</span><span>)</span></div>
+        <div class="encode-arrow">↓</div>
+        <code id="numberStrip">—</code>
+        <div class="encode-arrow">↓ decode</div>
+        <code id="decodeStrip">—</code>
+      </aside>
+    </section>
+
+    <section class="chapter diagonal" id="diagonal" data-stage="6">
+      <div class="copy">
+        <p class="eyebrow">06 / the great trick <em>standard</em></p>
+        <h2>A description can be applied to the thing it describes.</h2>
+        <p>Diagonalization turns a formula with a free variable into a sentence that receives its own code. This is not an infinite mirror; it is a one-step substitution that closes the loop.</p>
+        <div class="button-row">
+          <button type="button" data-action="diag-step">next construction step</button>
+          <button type="button" data-action="diag-reset">reset</button>
+        </div>
+        <div class="diag-log" id="diagLog">1 / choose a property P(x)</div>
+      </div>
+
+      <aside class="diag-stage" aria-label="Diagonal construction diagram">
+        <div class="diag-node function-node" id="diagFunction">P(x)</div>
+        <div class="diag-line"></div>
+        <div class="diag-node code-node" id="diagCode">⌜P(x)⌝</div>
+        <div class="diag-line"></div>
+        <div class="diag-node output-node" id="diagOutput">P(⌜P⌝)</div>
+      </aside>
+    </section>
+
+    <section class="chapter" id="godel" data-stage="7">
+      <div class="copy narrow">
+        <p class="eyebrow">07 / construct G <em>standard / pedagogical model</em></p>
+        <h2>Now make the system talk about its own proofs.</h2>
+        <p>Let <code>Proof<sub>S</sub>(p, q)</code> mean that <em>p</em> codes a valid proof in S of the formula with code <em>q</em>. Let <code>Prov<sub>S</sub>(q)</code> mean “there exists a proof p for q.”</p>
+        <p class="equation">G ↔ ¬Prov<sub>S</sub>(⌜G⌝)</p>
+        <p>In the intended arithmetic reading, G says: “this sentence is not provable in S.” The sentence is built by encoding and diagonalization, not simply announced.</p>
+        <div class="button-row">
+          <button type="button" data-action="godel-step">reveal next layer</button>
+          <button type="button" data-action="godel-reset">reset</button>
+        </div>
+      </div>
+
+      <aside class="godel-build" id="godelBuild">
+        <div>system S</div>
+        <div>proof predicate</div>
+        <div>self-code ⌜G⌝</div>
+        <div class="g-final">G : ¬Prov<sub>S</sub>(⌜G⌝)</div>
+      </aside>
+    </section>
+
+    <section class="chapter" id="branches" data-stage="8">
+      <div class="copy">
+        <p class="eyebrow">08 / why incompleteness follows <em>standard</em></p>
+        <h2>Follow both branches. Do not skip the logic.</h2>
+        <p>Assume S is sufficiently strong and consistent for the relevant arithmetic. Now trace what happens if S proves G, and what happens if S proves ¬G.</p>
+        <div class="button-row">
+          <button type="button" data-action="branch-g">assume S ⊢ G</button>
+          <button type="button" data-action="branch-notg">assume S ⊢ ¬G</button>
+          <button type="button" data-action="branch-reset">clear</button>
+        </div>
+        <div id="branchResult" class="branch-result">Choose a branch to inspect the consequence.</div>
+      </div>
+
+      <aside class="branch-tree">
+        <div class="branch-root">G ↔ ¬Prov<sub>S</sub>(⌜G⌝)</div>
+        <div class="branch-line"></div>
+        <div class="branch-columns">
+          <div id="branchG">S ⊢ G<br><small>not yet examined</small></div>
+          <div id="branchNotG">S ⊢ ¬G<br><small>not yet examined</small></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="chapter" id="truth" data-stage="9">
+      <div class="copy narrow">
+        <p class="eyebrow">09 / two viewpoints <em>standard</em></p>
+        <h2>Truth and provability are different relations.</h2>
+        <p>Inside S, the question is whether a proof exists. Outside S, we can judge the sentence in the intended arithmetic interpretation. Under the relevant soundness assumptions, G is true even though it is not provable in S.</p>
+      </div>
+
+      <div class="truth-panel">
+        <div class="layer inner"><span>inside S</span><strong id="innerTruth">no proof found</strong></div>
+        <div class="layer outer"><span>external arithmetic view</span><strong id="outerTruth">G is true under the intended interpretation</strong></div>
+        <input id="truthSlider" type="range" min="0" max="100" value="50" aria-label="move between internal and external viewpoints">
+        <p id="truthReadout">Slide between the relation inside the system and the relation outside it.</p>
+      </div>
+    </section>
+
+    <section class="chapter" id="strengthen" data-stage="10">
+      <div class="copy">
+        <p class="eyebrow">10 / try to escape <em>standard</em></p>
+        <h2>Add G as an axiom.</h2>
+        <p>That makes a stronger system, S + G. The old G becomes provable in the stronger system, but the same move creates a new diagonal statement for the wider system.</p>
+        <button type="button" data-action="add-axiom">add G to S</button>
+        <div class="system-growth" id="systemGrowth">S <span>→</span> S + ?</div>
+      </div>
+
+      <aside class="new-limit">
+        <span>new system</span>
+        <strong id="strongerSystem">S</strong>
+        <div id="newLimitText">Its own undecidable sentence has not yet been constructed.</div>
+      </aside>
+    </section>
+
+    <section class="chapter" id="halting" data-stage="11">
+      <div class="copy">
+        <p class="eyebrow">11 / a different substrate <em>standard</em></p>
+        <h2>Replace proofs with programs.</h2>
+        <p>The Halting Problem is not Gödel’s theorem, but it is built from the same diagonal pattern. A program asks whether another program halts, and then gets fed its own description.</p>
+        <div class="halting-machine">
+          <code>HALT?(P, x)</code>
+          <span id="oracleAnswer">oracle waiting</span>
+          <button type="button" data-action="oracle-normal">run ordinary program</button>
+          <button type="button" data-action="oracle-diagonal">run D on D</button>
+        </div>
+        <pre class="code-block">D(P):
   if HALT?(P, P) = HALTS:
       loop forever
   else:
-      halt</pre><p id="haltResult" class="halt-result">The hypothetical oracle looks perfect until D is given its own code.</p></div><div class="execution-trace" id="executionTrace"><span>program</span><i>→</i><span>oracle</span><i>→</i><span>behavior</span></div></section>
-    <section class="chapter correspondence" id="correspondence" data-stage="12"><div class="copy narrow"><p class="kicker">12 / related, not identical <em>STANDARD</em></p><h2>Two machines. One family resemblance.</h2><p>Gödel uses syntax, arithmetic coding, and provability. Turing uses programs, inputs, and behavior. Their substrates differ, but diagonal self-application defeats a complete internal procedure in each setting.</p></div><div class="correspondence-grid"><div><h3>Gödel</h3><code>syntax → code → self-reference → undecidable sentence</code></div><div><h3>Turing</h3><code>program → code → self-reference → undecidable behavior</code></div></div></section>
-    <section class="chapter outside split" id="outside" data-stage="13"><div class="copy"><p class="kicker">13 / jumping out <em>GEB</em></p><h2>Move to a meta-system.</h2><p>From outside S, we can talk about S and its proofs. That can settle questions unavailable inside S. But the meta-system is itself a formal system if we formalize it, and the pattern can return.</p><div class="level-controls"><button data-action="level-up">move one level up</button><button data-action="level-reset">reset level</button></div><div class="level-readout" id="levelReadout">object level / S</div></div><div class="level-stack" id="levelStack"><span>S</span><span>statements about S</span><span>meta-system</span></div></section>
-    <section class="chapter strange" id="strange" data-stage="14"><div class="copy narrow"><p class="kicker">14 / the earned interpretation <em>GEB</em></p><h2>A hierarchy that turns back on its own description.</h2><p>Only now is “strange loop” useful. It names the entanglement produced when a higher-level description is encoded at a lower level and then acts on the system it describes. It does not erase the proof distinctions; it gives them a larger conceptual home.</p></div><div class="loop-diagram"><div class="loop-level l0">formal symbols</div><div class="loop-level l1">statements about symbols</div><div class="loop-level l2">statements about statements</div><div class="loop-level l3">reasoning about S</div><div class="loop-return">↺ G</div></div></section>
-    <section class="chapter ending" id="ending" data-stage="15"><div class="copy narrow"><p class="kicker">15 / keep the mechanism</p><h2>What did we actually learn?</h2><div class="recap" id="recap"><button data-recap="formal">A formal system mechanically manipulates symbols.</button><button data-recap="theorem">A theorem is a string with a valid finite derivation.</button><button data-recap="encode">Encoding makes syntax available to arithmetic.</button><button data-recap="diagonal">Diagonalization creates a sentence about its own code.</button><button data-recap="incomplete">Under the relevant assumptions, G is undecidable in S.</button><button data-recap="truth">Truth in the intended model is not the same as provability.</button><button data-recap="halting">The Halting Problem shares the diagonal shape, not the exact theorem.</button><button data-recap="axiom">Adding an axiom strengthens S but does not end the phenomenon.</button></div><p id="recapAnswer" class="recap-answer">Activate a statement to make the machine restate the argument.</p></div><div class="final-formula"><span>FORMAL SYSTEM</span><i>+</i><span>ENCODING</span><i>+</i><span>DIAGONALIZATION</span><i>→</i><strong>LIMIT</strong></div></section>
-+  </main>
-+  <script type="module" src="script.js"></script>
-+</body>
-+</html>
+      halt</pre>
+        <p id="haltResult" class="halt-result">The hypothetical oracle looks perfect until D is given its own code.</p>
+      </div>
+
+      <aside class="execution-trace" id="executionTrace">
+        <span>program</span><i>→</i><span>oracle</span><i>→</i><span>behavior</span>
+      </aside>
+    </section>
+
+    <section class="chapter" id="correspondence" data-stage="12">
+      <div class="copy narrow">
+        <p class="eyebrow">12 / related, not identical <em>standard</em></p>
+        <h2>Two machines, one family resemblance.</h2>
+        <p>Gödel uses arithmetic coding and proof predicates. Turing uses programs, code, and halting behavior. Their substrates differ, but the diagonal obstacle is structurally the same.</p>
+      </div>
+
+      <div class="correspondence-grid">
+        <div>
+          <h3>Gödel</h3>
+          <code>syntax → code → self-reference → undecidable sentence</code>
+        </div>
+        <div>
+          <h3>Turing</h3>
+          <code>program → code → self-reference → undecidable behavior</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="outside" data-stage="13">
+      <div class="copy">
+        <p class="eyebrow">13 / jumping out <em>geb</em></p>
+        <h2>Move to a meta-system.</h2>
+        <p>From outside S, we can talk about S and its proofs. That can settle questions unavailable inside S, but the meta-system may itself become formalized and the pattern can recur.</p>
+        <div class="button-row">
+          <button type="button" data-action="level-up">move one level up</button>
+          <button type="button" data-action="level-reset">reset level</button>
+        </div>
+        <div class="level-readout" id="levelReadout">object level / S</div>
+      </div>
+
+      <aside class="level-stack" id="levelStack">
+        <span>S</span><span>statements about S</span><span>meta-system</span>
+      </aside>
+    </section>
+
+    <section class="chapter" id="strange" data-stage="14">
+      <div class="copy narrow">
+        <p class="eyebrow">14 / the earned interpretation <em>geb</em></p>
+        <h2>A hierarchy that turns back on its own description.</h2>
+        <p>Only after the mechanism is in place does “strange loop” become explanatory. It names a hierarchy in which higher-level descriptions are encoded and then act on the system they describe.</p>
+      </div>
+
+      <div class="loop-diagram" aria-label="Strange loop hierarchy">
+        <div class="loop-level l0">formal symbols</div>
+        <div class="loop-level l1">statements about symbols</div>
+        <div class="loop-level l2">statements about statements</div>
+        <div class="loop-level l3">reasoning about S</div>
+        <div class="loop-return">↺ G</div>
+      </div>
+    </section>
+
+    <section class="chapter ending" id="ending" data-stage="15">
+      <div class="copy narrow">
+        <p class="eyebrow">15 / keep the mechanism</p>
+        <h2>What did we actually learn?</h2>
+        <div class="recap" id="recap">
+          <button type="button" data-recap="formal">A formal system mechanically manipulates symbols.</button>
+          <button type="button" data-recap="theorem">A theorem is a finite derivation, not just a plausible statement.</button>
+          <button type="button" data-recap="encode">Encoding makes syntax available to arithmetic.</button>
+          <button type="button" data-recap="diagonal">Diagonalization creates a sentence about its own code.</button>
+          <button type="button" data-recap="incomplete">Under the relevant assumptions, G is undecidable in S.</button>
+          <button type="button" data-recap="truth">Truth in the intended model is not the same as provability.</button>
+          <button type="button" data-recap="halting">The Halting Problem shares the diagonal shape, not the exact theorem.</button>
+          <button type="button" data-recap="axiom">Adding an axiom strengthens S but does not end the phenomenon.</button>
+        </div>
+        <p id="recapAnswer" class="recap-answer">Activate a statement to restate the argument.</p>
+      </div>
+
+      <aside class="final-formula">
+        <span>formal system</span><i>+</i><span>encoding</span><i>+</i><span>diagonalization</span><i>→</i><strong>limit</strong>
+      </aside>
+    </section>
+  </main>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
